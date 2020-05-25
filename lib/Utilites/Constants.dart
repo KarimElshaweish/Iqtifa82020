@@ -37,12 +37,12 @@ final kBoxDecorationStyle = BoxDecoration(
 );
 final kBoxDecorationStyleGezara = BoxDecoration(
   color: Color(0xFFFFFFFF),
-  borderRadius: BorderRadius.circular(10.0),
+  borderRadius: BorderRadius.circular(5.0),
   boxShadow: [
     BoxShadow(
       color: Colors.black12,
-      blurRadius: 6.0,
-      offset: Offset(0, 2),
+      blurRadius: 1.0,
+      offset: Offset(0, 1),
     ),
   ],
 );

@@ -355,31 +355,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
               )
               ,
-
-//              Container(
-//                height: double.infinity,
-//                width: double.infinity,
-//                decoration: BoxDecoration(
-//                    color: Colors.white
-//                ),
-//              ),
-//              Column(
-//                  children: <Widget>[
-//                    new Container(
-//                      height: 190,
-//                      width: 500,
-//                      decoration: new BoxDecoration(
-//                        image: new DecorationImage(image:
-//                        new AssetImage("assets/login_bk.png"),
-//                            fit: BoxFit.fill
-//                        ),
-//                      ),
-//                      child: Image(
-//                        image: AssetImage('assets/logo_white.png'),
-//                      ),
-//                    ),
-//                  ]
-//              ),
               Container(
                 height: double.infinity,
                 padding: EdgeInsets.only(top: 80),
