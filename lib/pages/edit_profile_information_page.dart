@@ -33,7 +33,6 @@ class _EditProfileInformation extends State<EditProfileInformation>{
         imageUrl=snapShot.value['url'];
       });
     });
-
   }
   getUserData()async {
     FirebaseUser user = await FirebaseAuth.instance.currentUser();

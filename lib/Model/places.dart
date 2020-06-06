@@ -5,5 +5,4 @@ class Places{
   final String time;
   String placeName;
   Places(this.lit, this.long, this.date,this.time);
-
 }

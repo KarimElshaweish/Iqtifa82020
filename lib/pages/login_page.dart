@@ -21,10 +21,8 @@ class _LoginScreenState extends State<LoginScreen> {
   //  Navigator.of(context).push(MaterialPageRoute(builder: (context) => SignUpScreen()));
   }
   onLoginClicked() async {
-    print(emailTextFiled.text.toString());
-    print(passwrodTextFiled.text.toString());
 
-    //Navigator.of(context).push(MaterialPageRoute(builder: (context) => MainPage()));
+    Navigator.of(context).push(MaterialPageRoute(builder: (context) => LoginScreen()));
   }
   void performLogin()async {
     Auth auth = new Auth();
