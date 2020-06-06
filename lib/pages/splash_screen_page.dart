@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:lqtifa/pages/login_page.dart';
 
 import '../main.dart';
 import 'home_screen_page.dart';
@@ -19,7 +20,7 @@ class _SplashScreen extends State<SplashScreen>{
 
   }
   onDoneLoading() async {
-    Navigator.of(context).push(MaterialPageRoute(builder: (context) => Setting()));
+    Navigator.of(context).push(MaterialPageRoute(builder: (context) => LoginScreen()));
   }
   @override
   Widget build(BuildContext context) {

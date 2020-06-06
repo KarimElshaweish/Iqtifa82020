@@ -1,13 +1,15 @@
 
 import 'dart:ui';
 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:lqtifa/Utilites/Constants.dart';
+import 'package:lqtifa/pages/home_screen_page.dart';
+import 'package:lqtifa/pages/locaion_live.dart';
 
 class MainHome extends StatefulWidget{
   @override
@@ -18,120 +20,59 @@ class _MainHome extends State<MainHome>{
   void initState() {
     super.initState();
   }
-
-  setLanguage(BuildContext context)async {
-//    SharedPreferences prefs = await SharedPreferences.getInstance();
-//    var lang_id=languages.indexOf(_selectedLang)+1;
-//    var uid = prefs.get("SessionID");
-//    print(uid);
-//    var response = await http.get(
-//        "https://rightclick.sa/projects/saud/api/rest/languages/${lang_id}",
-//        headers: {'X-Oc-Merchant-Id': 'SRQ7pJJG1VBXpQY5RPpUIigh3BdCl4He',
-//          'X-Oc-Session': uid,
-//        }
-//    );
-//    print(response.body);
-  }
-
-  Widget _buildLoginBtn() {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 20.0,horizontal: 50.0),
-      width: double.infinity,
-      child: RaisedButton(
-        elevation: 5.0,
-        onPressed: () => setLanguage(context),
-        padding: EdgeInsets.all(15.0),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30.0),
-        ),
-        color:Color(0xff2BAA4A),
-        child: Text(
-          'confirm changes',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 17.0,
-            fontFamily: 'OpenSans',
-          ),
-        ),
-      ),
-    );
-  }
-  Widget _buildSaveBtn() {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 50.0),
-      width: double.infinity,
-      child: RaisedButton(
-        elevation: 5.0,
-        onPressed: () => setLanguage(context),
-        padding: EdgeInsets.all(15.0),
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30.0),
-            side: BorderSide(color:Color(0xff2BAA4A),width: 2 )
-        )
-
-
-        ,
-        color:Colors.white,
-        child: Text(
-          'confirm changes',
-          style: TextStyle(
-            color: Color(0xff2BAA4A),
-            fontSize: 17.0,
-            fontFamily: 'OpenSans',
-          ),
-        ),
-      ),
-    );
+  bool checkData(String date){
+    DateTime now = new DateTime.now();
+ //   String nSt="${now.day}/${now.month}/${now.year}";
+    List<String> dateList=date.split(" ");
+    if(dateList!=[]) {
+      print("data:${dateList}");
+      String cd = dateList.length>1?dateList[1]:dateList[0];
+      List<String> dataSpliter = cd.split("/");
+      if (double.parse(now.year.toString()) < double.parse(dataSpliter[2])) {
+        print("year: ${now.year}  < ${dataSpliter[2]}");
+        return false;
+      } else
+      if (double.parse(now.month.toString()) < double.parse(dataSpliter[1])) {
+        print("month: ${now.month}  < ${dataSpliter[1]}");
+        return false;
+      }
+      else if (double.parse(now.day.toString()) < double.parse(dataSpliter[0])) {
+        print("day: ${now.day}  < ${dataSpliter[0]}");
+        return false;
+      }
+      return true;
+    }
+    return false;
   }
   final emailTextFiled=new TextEditingController();
-  Widget _buildEmailTF() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        SizedBox(height: 10.0),
-        Text(
-          'Email',
-          style: kHintTextStyleGezara,
-        ),
-        SizedBox(height: 10.0),
-        Container(
-          alignment: Alignment.centerLeft,
-          decoration: kBoxDecorationStyleGezara,
-          height: 60.0,
-          child: Padding(
-            padding: EdgeInsets.all(10.0),
-            child:Text('Mohammedahmed@gmail.com') ,
-          ),
-        ),
-      ],
-    );
+  List<dynamic>days=[];
+  List<dynamic>daysNames=[];
+  Future<dynamic> getdata() async {
+  try {
+    var DBRef = FirebaseDatabase.instance.reference();
+    FirebaseUser user = await FirebaseAuth.instance.currentUser();
+    String uid = user.uid;
+    DBRef.child("datas/${uid}").once().then((datasnapshot) {
+      List<dynamic>filterdDays=[];
+      filterdDays = datasnapshot.value['days'];
+      filterdDays=filterdDays.reversed.toList();
+      for(int i=0;i<filterdDays.length;i++)
+        if(!checkData(filterdDays[i])) {
+          filterdDays.remove(filterdDays[i]);
+          i--;
+          print("current list: $filterdDays");
+        }
+      days=filterdDays;
+    });
+  }catch(e){
+    print(e);
   }
-  Widget _buildPasswordTF() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        SizedBox(height: 10.0),
-        Text(
-          "password",
-          style: kHintTextStyleGezara,
-        ),
-        SizedBox(height: 10.0),
-        Container(
-          alignment: Alignment.centerLeft,
-          decoration: kBoxDecorationStyleGezara,
-          height: 60.0,
-          child: Padding(
-            padding: EdgeInsets.all(10.0),
-            child:Text('*********') ,
-          ),
-        ),
-      ],
-    );
+    return days;
   }
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
+
     return  Scaffold(
       body: AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.light,
@@ -165,106 +106,128 @@ class _MainHome extends State<MainHome>{
                         child: Stack(
                           children: <Widget>[
                             Align(
-                              alignment: Alignment.topLeft,
-                              child: Column(
-                                children: <Widget>[
-                                  Align(
-                                    alignment: Alignment.topLeft,
-                                    child:Text(
-                                      'Home',
-                                      style: TextStyle(
-                                        color: Color(0xff0DB14B),
-                                        fontSize: 23,
-                                        fontStyle: FontStyle.normal,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ) ,
-                                  ),
-                                  Align(
-                                    alignment: Alignment.topLeft,
-                                    child:
-                                    Text(
-                                      'Your last 14 visted places',
-                                      style: TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 15,
-                                        fontStyle: FontStyle.normal,
+                                alignment: Alignment.topLeft,
+                                child: Column(
+                                  children: <Widget>[
+                                    Align(
+                                      alignment: Alignment.topLeft,
+                                      child:Text(
+                                        'Home',
+                                        style: TextStyle(
+                                          color: Color(0xff0DB14B),
+                                          fontSize: 23,
+                                          fontStyle: FontStyle.normal,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ) ,
+                                    ),
+                                    Align(
+                                      alignment: Alignment.topLeft,
+                                      child:
+                                      Text(
+                                        'Your last 14 visted places',
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 15,
+                                          fontStyle: FontStyle.normal,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  Align(
-                                    alignment: Alignment.topLeft,
-                                    child: Text(
-                                      'click to view details',
-                                      style: TextStyle(
-                                        color: Color(0xffCCCCCC),
-                                        fontSize: 15,
-                                        fontStyle: FontStyle.normal,
+                                    Align(
+                                      alignment: Alignment.topLeft,
+                                      child: Text(
+                                        'click to view details',
+                                        style: TextStyle(
+                                          color: Color(0xffCCCCCC),
+                                          fontSize: 15,
+                                          fontStyle: FontStyle.normal,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
-                              )
+                                  ],
+                                )
                             ),
                             Container(
-                              child: Align(
-                                  alignment: Alignment.topRight,
-                                  child: Image(
-                                    image: AssetImage('assets/menu.png'),
-                                  )
-                              ),
+                              child: GestureDetector(
+                                onTap:()=> Navigator.of(context).push(
+                                    MaterialPageRoute(builder: (context) =>
+                                        Setting())),
+                                child: Align(
+                                    alignment: Alignment.topRight,
+                                    child: Image(
+                                      image: AssetImage('assets/menu.png'),
+                                    )
+                                ),
+                              )
+
                             )
                           ],
                         ),
                       ),
                       SizedBox(
-                        height: 500,
-                        child: GridView.count(crossAxisCount: 3,
-                            children: new List<Widget>.generate(14, (index) {
+                          height: 500,
+                          child: FutureBuilder(
+                            future: getdata(),
+                            builder: (BuildContext context,AsyncSnapshot snapshot){
+                              return
+                                GridView.count(crossAxisCount: 3,
+                            children: new List<Widget>.generate(days.length, (index) {
                               return new GridTile(
-                                child: new Container(
-                                  margin: EdgeInsets.all(7),
-                                  decoration: BoxDecoration(
-                                      color: Color(0xffF5F6FA),
-                                    borderRadius: BorderRadius.all(Radius.circular(20))
-                                  ),
-                                    child:
-                                    Padding(
-                                      padding: EdgeInsets.all(10),
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                        children: <Widget>[
-                                          Text(
-                                            'Day ${index+1}',
-                                            style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 15,
-                                              fontStyle: FontStyle.normal,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          Center(
-                                            child:  Text(
-                                              'Saturday 14 MAY 2020 8 Places Visted',
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
-                                                color: Color(0xff707070),
-                                                fontSize: 12,
-                                                fontStyle: FontStyle.normal,
-                                              ),
-                                            ) ,
-
-                                          )
-
-
-                                        ],
+                                child:
+                                GestureDetector(
+                                  onTap:() {
+                                    Utils.currentDay=days[index].toString().split(" ")[1].replaceAll("/","");
+                                    print('utils:${Utils.currentDay}');
+                                    Utils.dayName=days[index].toString().split(" ")[0];
+                                    Utils.dayDate=days[index].toString().split(" ")[1];
+                                    Navigator.of(context).push(
+                                        MaterialPageRoute(builder: (context) =>
+                                            LiveLocation()));
+                                  },
+                                  child: new Container(
+                                      margin: EdgeInsets.all(7),
+                                      decoration: BoxDecoration(
+                                          color: Color(0xffF5F6FA),
+                                          borderRadius: BorderRadius.all(Radius.circular(20))
                                       ),
-                                    )
+                                      child:
+                                      Padding(
+                                        padding: EdgeInsets.all(10),
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          children: <Widget>[
+                                            Text(
+                                              'Day ${index+1}',
+                                              style: TextStyle(
+                                                color: Colors.black,
+                                                fontSize: 15,
+                                                fontStyle: FontStyle.normal,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            Center(
+                                              child:  Text(
+                                                '${days[index]}  Places Visted',
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                  color: Color(0xff707070),
+                                                  fontSize: 12,
+                                                  fontStyle: FontStyle.normal,
+                                                ),
+                                              ) ,
 
-                                ),
+                                            )
+                                          ],
+                                        ),
+                                      )
+
+                                  ),
+                                )
                               );
-                            })) ,
+                            }));
+                            },
+                          )
                       )
                     ],
                   ),

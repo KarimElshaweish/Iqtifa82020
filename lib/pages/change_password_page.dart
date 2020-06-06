@@ -1,4 +1,5 @@
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
@@ -12,42 +13,15 @@ class ChangePassword extends StatefulWidget{
   State<StatefulWidget> createState() => _ChangePassword();
 }
 class _ChangePassword extends State<ChangePassword>{
-  var languages=["English","Arablic"];
-  List<DropdownMenuItem<String>>_dropDownMenuItems;
-  String _selectedLang;
-  List<DropdownMenuItem<String>> buildAndGetDropDownMenuItems(List langauges) {
-    List<DropdownMenuItem<String>> items = new List();
-    for (String langu in langauges) {
-      items.add(new DropdownMenuItem(value: langu, child: new Text(langu)));
-    }
-    return items;
-  }
+
   @override
   void initState() {
-    _dropDownMenuItems=buildAndGetDropDownMenuItems(languages);
-    _selectedLang=_dropDownMenuItems[0].value;
     super.initState();
-  }
-  void changedDropDownItem(String slectedLang) {
-    setState(() {
-      _selectedLang = slectedLang;
-    });
   }
   void onchoiceLangClicked(){
     print("language");
   }
-  setLanguage(BuildContext context)async {
-//    SharedPreferences prefs = await SharedPreferences.getInstance();
-//    var lang_id=languages.indexOf(_selectedLang)+1;
-//    var uid = prefs.get("SessionID");
-//    print(uid);
-//    var response = await http.get(
-//        "https://rightclick.sa/projects/saud/api/rest/languages/${lang_id}",
-//        headers: {'X-Oc-Merchant-Id': 'SRQ7pJJG1VBXpQY5RPpUIigh3BdCl4He',
-//          'X-Oc-Session': uid,
-//        }
-//    );
-//    print(response.body);
+  changePassword(BuildContext context)async {
   }
 
   Widget _buildLoginBtn() {
@@ -56,7 +30,7 @@ class _ChangePassword extends State<ChangePassword>{
       width: double.infinity,
       child: RaisedButton(
         elevation: 5.0,
-        onPressed: () => setLanguage(context),
+        onPressed: () => changePassword(context),
         padding: EdgeInsets.all(15.0),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(30.0),
@@ -73,35 +47,9 @@ class _ChangePassword extends State<ChangePassword>{
       ),
     );
   }
-  Widget _buildSaveBtn() {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 50.0),
-      width: double.infinity,
-      child: RaisedButton(
-        elevation: 5.0,
-        onPressed: () => setLanguage(context),
-        padding: EdgeInsets.all(15.0),
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30.0),
-            side: BorderSide(color:Color(0xff2BAA4A),width: 2 )
-        )
-
-
-        ,
-        color:Colors.white,
-        child: Text(
-          'confirm changes',
-          style: TextStyle(
-            color: Color(0xff2BAA4A),
-            fontSize: 17.0,
-            fontFamily: 'OpenSans',
-          ),
-        ),
-      ),
-    );
-  }
   final passwordTextFiled=new TextEditingController();
   final confirmPasswordFiled=new TextEditingController();
+  final newPasswordFiled=new TextEditingController();
   Widget _buildPasswordTF() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -149,7 +97,7 @@ class _ChangePassword extends State<ChangePassword>{
           decoration: kBoxDecorationStyleGezara,
           height: 60.0,
           child: TextField(
-            controller: confirmPasswordFiled,
+            controller: newPasswordFiled,
             obscureText: true,
             style: TextStyle(
               color: Colors.black,

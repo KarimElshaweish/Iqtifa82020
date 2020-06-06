@@ -1,13 +1,21 @@
 
 import 'dart:convert';
 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
+import 'package:lqtifa/Services/Auth.dart';
 import 'package:lqtifa/Utilites/Constants.dart';
+import 'package:lqtifa/pages/home_screen_page.dart';
+import 'package:progress_dialog/progress_dialog.dart';
+
+import 'login_page.dart';
 
 class SignUpScreen extends StatefulWidget{
   @override
@@ -21,37 +29,59 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
   onLoginClicked() async {
 
-   // Navigator.of(context).push(MaterialPageRoute(builder: (context) => LoginScreen()));
+    Navigator.of(context).push(MaterialPageRoute(builder: (context) => LoginScreen()));
   }
-  register()async{
-//    pr.show();
-//    Map data={
-//      "firstname": firstNameFiled.text,
-//      "lastname": lastNameFiled.text,
-//      "email": emailTextFiled.text,
-//      "password": passwordTextFiled.text,
-//      "confirm": confirmPasswordFiled.text,
-//      "telephone": phoneNumberFiled.text,
-//      "agree": "1"
-//    };
-//    var body=jsonEncode(data);
-//    var response= await http.post("https://rightclick.sa/projects/saud/api/rest/register/register",
-//        headers: {'X-Oc-Merchant-Id': 'SRQ7pJJG1VBXpQY5RPpUIigh3BdCl4He'},
-//        body: body);
-//    print(jsonDecode(response.body));
-//    pr.hide();
-//    if(response.statusCode==200){
-//      SharedPreferences prefs=await SharedPreferences.getInstance();
-//      prefs.setString('guest', '0');
-//      Navigator.of(context).push(MaterialPageRoute(builder: (context) => MainPage()));
-//
-//    }else{
-//      pr.hide();
-//
-//      showAlertDialog(context);
-//    }
+  register()async {
+    if (emailTextFiled.text.contains('@') && phoneNumberFiled.text
+        .trim()
+        .toString()
+        .length > 0 &&
+        passwordTextFiled.text.trim().toString() ==
+            confirmPasswordFiled.text.trim().toString()) {
+      if(passwordTextFiled.text.trim().toString().length<6) {
+        pr.hide();
+        showAlertDialog(context, "password must be more than 6 words");
+      }
+      else {
+        if (!_rememberMe) {
+          showAlertDialog(context, "please cofirm terms and condations");
+        }
+        else {
+          pr.show();
+          Auth auth = Auth();
+          dynamic result = await auth.register(
+              emailTextFiled.text.trim().toString(),
+              passwordTextFiled.text.trim().toString());
+          pr.hide();
+          if (result == null)
+            showAlertDialog(context, "something wrong");
+          else {
+            var DBRef=FirebaseDatabase.instance.reference();
+            FirebaseUser user=await FirebaseAuth.instance.currentUser();
+           String uid=user.uid;
+            List<String>datesList=[];
+            DateTime now = new DateTime.now();
+            String dayName=DateFormat('EEEE').format(now);
+            datesList.add("${dayName} ${now.day}/${now.month}/${now.year}");
+            for(int i=1;i<14;i++) {
+              now = new DateTime.now().add(new Duration(days: i));
+              dayName=DateFormat('EEEE').format(now);
+
+              datesList.add("${dayName} ${now.day}/${now.month}/${now.year}");
+            }
+            DBRef.child("datas/${uid}").set({
+              'days':datesList
+            });
+            Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => Setting()));
+          }
+        }
+      }
+    } else {
+      showAlertDialog(context,'plesae fill all data');
+    }
   }
-  showAlertDialog(BuildContext context) {
+  showAlertDialog(BuildContext context,String msg) {
 
     // set up the button
     Widget okButton = FlatButton(
@@ -62,7 +92,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     // set up the AlertDialog
     AlertDialog alert = AlertDialog(
       title: Text("Authentication failed"),
-      content: Text("check all data"),
+      content: Text(msg),
       actions: [
         okButton,
       ],
@@ -77,7 +107,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
- // ProgressDialog pr;
+  ProgressDialog pr;
   final emailTextFiled=new TextEditingController();
   final passwordTextFiled=new TextEditingController();
   final confirmPasswordFiled=new TextEditingController();
@@ -312,7 +342,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   @override
   Widget build(BuildContext context) {
-    //pr = new ProgressDialog(context);
+    pr = new ProgressDialog(context);
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(

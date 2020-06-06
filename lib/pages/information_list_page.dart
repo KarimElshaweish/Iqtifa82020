@@ -11,7 +11,6 @@ class InformationList extends StatelessWidget{
           return Container(
             child: Row(
               children: <Widget>[
-
               ],
             ),
           );

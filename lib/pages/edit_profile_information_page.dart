@@ -1,53 +1,58 @@
 
+import 'dart:io';
+
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:lqtifa/Utilites/Constants.dart';
+import 'package:lqtifa/pages/home_screen_page.dart';
 
 class EditProfileInformation extends StatefulWidget{
   @override
   State<StatefulWidget> createState() => _EditProfileInformation();
 }
 class _EditProfileInformation extends State<EditProfileInformation>{
-  var languages=["English","Arablic"];
-  List<DropdownMenuItem<String>>_dropDownMenuItems;
-  String _selectedLang;
-  List<DropdownMenuItem<String>> buildAndGetDropDownMenuItems(List langauges) {
-    List<DropdownMenuItem<String>> items = new List();
-    for (String langu in langauges) {
-      items.add(new DropdownMenuItem(value: langu, child: new Text(langu)));
-    }
-    return items;
-  }
+
   @override
-  void initState() {
-    _dropDownMenuItems=buildAndGetDropDownMenuItems(languages);
-    _selectedLang=_dropDownMenuItems[0].value;
+  void initState(){
     super.initState();
+    getProfileImage();
   }
-  void changedDropDownItem(String slectedLang) {
+  String imageUrl="";
+  getProfileImage()async{
+    FirebaseUser user = await FirebaseAuth.instance.currentUser();
+    DBRef.child('profileImages/${user.uid}').once().then((snapShot){
+      print(snapShot.value['url']);
+      setState(() {
+        imageUrl=snapShot.value['url'];
+      });
+    });
+
+  }
+  getUserData()async {
+    FirebaseUser user = await FirebaseAuth.instance.currentUser();
     setState(() {
-      _selectedLang = slectedLang;
+      print(user.email);
+      email = user.email.toString();
     });
   }
-  void onchoiceLangClicked(){
-    print("language");
-  }
-  setLanguage(BuildContext context)async {
-//    SharedPreferences prefs = await SharedPreferences.getInstance();
-//    var lang_id=languages.indexOf(_selectedLang)+1;
-//    var uid = prefs.get("SessionID");
-//    print(uid);
-//    var response = await http.get(
-//        "https://rightclick.sa/projects/saud/api/rest/languages/${lang_id}",
-//        headers: {'X-Oc-Merchant-Id': 'SRQ7pJJG1VBXpQY5RPpUIigh3BdCl4He',
-//          'X-Oc-Session': uid,
-//        }
-//    );
-//    print(response.body);
+  changePasswordRequest()async{
+    FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+    Fluttertoast.showToast(
+        msg: "password sent to your email",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.black54,
+        textColor: Colors.white,
+        fontSize: 16.0
+    );
   }
 
   Widget _buildLoginBtn() {
@@ -56,7 +61,6 @@ class _EditProfileInformation extends State<EditProfileInformation>{
       width: double.infinity,
       child: RaisedButton(
         elevation: 5.0,
-        onPressed: () => setLanguage(context),
         padding: EdgeInsets.all(15.0),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(30.0),
@@ -79,7 +83,7 @@ class _EditProfileInformation extends State<EditProfileInformation>{
       width: double.infinity,
       child: RaisedButton(
         elevation: 5.0,
-        onPressed: () => setLanguage(context),
+        onPressed: ()=>changePasswordRequest(),
         padding: EdgeInsets.all(15.0),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(30.0),
@@ -90,7 +94,7 @@ class _EditProfileInformation extends State<EditProfileInformation>{
         ,
         color:Colors.white,
         child: Text(
-          'confirm changes',
+          'change password',
           style: TextStyle(
             color: Color(0xff2BAA4A),
             fontSize: 17.0,
@@ -101,6 +105,7 @@ class _EditProfileInformation extends State<EditProfileInformation>{
     );
   }
   final emailTextFiled=new TextEditingController();
+  String email="";
   Widget _buildEmailTF() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,7 +122,7 @@ class _EditProfileInformation extends State<EditProfileInformation>{
           height: 60.0,
           child: Padding(
             padding: EdgeInsets.all(10.0),
-            child:Text('Mohammedahmed@gmail.com') ,
+            child:Text('$email') ,
           ),
         ),
       ],
@@ -145,11 +150,40 @@ class _EditProfileInformation extends State<EditProfileInformation>{
       ],
     );
   }
-
+  File _image;
+  final picker=ImagePicker();
+  Future getImageFromGaller()async{
+    final pickedFile=await picker.getImage(source: ImageSource.gallery);
+    setState(() {
+      _image=File(pickedFile.path);
+      uploadToFirbase();
+    });
+  }
+  var DBRef=FirebaseDatabase.instance.reference();
+  uploadToFirbase()async{
+    try {
+      FirebaseUser user = await FirebaseAuth.instance.currentUser();
+      final StorageReference storageReference = FirebaseStorage.instance.ref()
+          .child('profilesImage/${_image.path
+          .split('/')
+          .last}');
+      StorageUploadTask uploadTask = storageReference.putFile(_image);
+      await uploadTask.onComplete;
+      print('uploade');
+      storageReference.getDownloadURL().then((value) {
+        DBRef.child('profileImages/${user.uid}').set({
+        'url': value
+        });
+        print('Download url:${value}');
+      });
+    }catch(e){
+      print(e);
+    }
+  }
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
-    return  Scaffold(
+getUserData();
+return  Scaffold(
       body: AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.light,
         child: GestureDetector(
@@ -192,41 +226,51 @@ class _EditProfileInformation extends State<EditProfileInformation>{
                               ),
                             ),
                             Container(
-                              child: Align(
-                                  alignment: Alignment.topRight,
-                                  child: Image(
-                                    image: AssetImage('assets/menu.png'),
-                                  )
+                              child: GestureDetector(
+                                onTap: ()=>Navigator.of(context).push(
+                                    MaterialPageRoute(builder: (context) =>
+                                        Setting())),
+                                child: Align(
+                                    alignment: Alignment.topRight,
+                                    child: Image(
+                                      image: AssetImage('assets/menu.png'),
+                                    )
+                                ),
                               ),
                             )
                           ],
                         ),
                       ),
                       SizedBox(height: 10,),
-                      new Container(
-                        width: 150,
-                        height: 150,
-                        decoration: new BoxDecoration(
-                          color: Colors.black87,
-                          image: new DecorationImage(
-                              image: new AssetImage('assets/avatar_man.jpg'),
-                            fit: BoxFit.cover,
-                            colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.4), BlendMode.dstATop),
+                      new GestureDetector(
+                        onTap: ()=>getImageFromGaller(),
+                        child:new Container(
+                          width: 150,
+                          height: 150,
+                          decoration: new BoxDecoration(
+                              color: Colors.black87,
+                              image: new DecorationImage(
+                                image: _image==null?imageUrl==null?new AssetImage('assets/avatar_man.jpg'):NetworkImage(imageUrl):
+                                FileImage(_image),
+                                fit: BoxFit.cover,
+                                colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.4), BlendMode.dstATop),
+                              ),
+                              borderRadius: new BorderRadius.all(new Radius.circular(75.0)),
+                              border: Border.all(
+                                  color: Color(0xff0DB14B),
+                                  width: 2.0
+                              )
                           ),
-                          borderRadius: new BorderRadius.all(new Radius.circular(75.0)),
-                          border: Border.all(
-                            color: Color(0xff0DB14B),
-                            width: 2.0
-                          )
-                        ),
-                        child: Center(
-                          child: Image(
-                            image: AssetImage(
-                              'assets/camera.png'
+                          child: Center(
+                            child: Image(
+                              image: AssetImage(
+                                  'assets/camera.png'
+                              ),
                             ),
                           ),
                         ),
                       ),
+
                       Padding(
                         padding: EdgeInsets.all(16.0),
                         child: Column(
@@ -238,10 +282,10 @@ class _EditProfileInformation extends State<EditProfileInformation>{
                             ),
                             _buildPasswordTF(),
                             //   _buildEmailTF(),
-                            SizedBox(
-                              height: 10.0,
-                            ),
-                            _buildLoginBtn(),
+//                            SizedBox(
+//                              height: 10.0,
+//                            ),
+//                            _buildLoginBtn(),
                             SizedBox(
                               height: 10.0,
                             ),
@@ -266,5 +310,4 @@ class _EditProfileInformation extends State<EditProfileInformation>{
       ),
     );
   }
-
 }

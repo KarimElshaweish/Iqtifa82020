@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:lqtifa/Utilites/Constants.dart';
+import 'package:lqtifa/pages/home_screen_page.dart';
 
 class AboutInfromation extends StatefulWidget{
   @override
@@ -73,12 +74,17 @@ class _AboutInfromation extends State<AboutInfromation>{
                               ),
                             ),
                             Container(
-                              child: Align(
-                                  alignment: Alignment.topRight,
-                                  child: Image(
-                                    image: AssetImage('assets/menu.png'),
-                                  )
-                              ),
+                              child:GestureDetector(
+                                onTap: ()=>Navigator.of(context).push(
+                                  MaterialPageRoute(builder: (context)=>
+                                  Setting())),
+                                child: Align(
+                                    alignment: Alignment.topRight,
+                                    child: Image(
+                                      image: AssetImage('assets/menu.png'),
+                                    )
+                                ),
+                              )
                             )
                           ],
                         ),
@@ -106,7 +112,7 @@ class _AboutInfromation extends State<AboutInfromation>{
                         child: Column(
                           children: <Widget>[
                             Text(
-                              'AQTFA Application',
+                              'IQTIFA Application',
                               style: TextStyle(
                                   color: Color(0xff16AE2E),
                                   fontSize: 20,

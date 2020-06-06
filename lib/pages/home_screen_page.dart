@@ -2,6 +2,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:lqtifa/Services/Auth.dart';
+import 'package:lqtifa/pages/about_page.dart';
+import 'package:lqtifa/pages/edit_profile_information_page.dart';
+import 'package:lqtifa/pages/home_page.dart';
+import 'package:lqtifa/pages/login_page.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Setting extends StatefulWidget{
   @override
@@ -52,9 +58,6 @@ Widget _CustomeButton(BuildContext context,String name,String img){
                     Row(
                       children: <Widget>[
                         Container(
-                          child: Image(
-                            image: AssetImage('assets/arrow.png'),
-                          ),
                         )
                       ],
                     )
@@ -66,17 +69,17 @@ Widget _CustomeButton(BuildContext context,String name,String img){
             ),
             onPressed: (){
               switch(name){
-                case "Login / Sign up":
-               //   Navigator.of(context).push(MaterialPageRoute(builder: (context) => SignUpScreen()));
+                case "| Home":
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => MainHome()));
                   break;
-                case "Contact Us":
+                case "| Edit Profile Information":
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => EditProfileInformation()));
                   break;
-                case "Language":
-                //  Navigator.of(context).push(MaterialPageRoute(builder: (context) => ChoiceLanguage()));
+                case "| About":
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => AboutInfromation()));
                   break;
-                case "About Us":
-                  break;
-                case "Terms and Conditions":
+                case "| Terms and Conditions":
+                 openUrl();
                   break;
               }
             },
@@ -86,6 +89,12 @@ Widget _CustomeButton(BuildContext context,String name,String img){
       )
     ],
   );
+}
+openUrl()async{
+  print('a7ooooooooooo');
+  const url = "https://flutter.io";
+  if (await canLaunch(url))
+    launch(url);
 }
 showAlertDialog(BuildContext context) {
 
@@ -156,7 +165,7 @@ Widget _CustomeLogout(BuildContext context){
               ],
             ),
             onPressed: (){
-              //logout(context);
+              logout(context);
             },
 
           )
@@ -165,6 +174,15 @@ Widget _CustomeLogout(BuildContext context){
     ],
   );
 }
+
+void logout(BuildContext context)async {
+  Auth auth=new Auth();
+  var result=await auth.signOut();
+  if(result==null)
+    showAlertDialog(context);
+  else
+     Navigator.of(context).push(MaterialPageRoute(builder: (context) => LoginScreen()));
+  }
 class _Setting extends State<Setting>{
   @override
   Widget build(BuildContext context) {

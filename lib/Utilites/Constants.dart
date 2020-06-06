@@ -46,3 +46,11 @@ final kBoxDecorationStyleGezara = BoxDecoration(
     ),
   ],
 );
+
+class Utils{
+  static String currentDay="";
+
+  static String dayName;
+
+  static String dayDate;
+}

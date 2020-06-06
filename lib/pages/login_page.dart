@@ -4,7 +4,10 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:lqtifa/Services/Auth.dart';
 import 'package:lqtifa/Utilites/Constants.dart';
+
+import 'home_screen_page.dart';
 
 
 class LoginScreen extends StatefulWidget{
@@ -14,13 +17,28 @@ class LoginScreen extends StatefulWidget{
 class _LoginScreenState extends State<LoginScreen> {
   bool _rememberMe = false;
   onSignUpClicked() async {
+
   //  Navigator.of(context).push(MaterialPageRoute(builder: (context) => SignUpScreen()));
   }
   onLoginClicked() async {
     print(emailTextFiled.text.toString());
     print(passwrodTextFiled.text.toString());
+
     //Navigator.of(context).push(MaterialPageRoute(builder: (context) => MainPage()));
   }
+  void performLogin()async {
+    Auth auth = new Auth();
+    var value = await auth.signIn(emailTextFiled.text.trim().toString(),
+        passwrodTextFiled.text.trim().toString());
+    if (value != null)
+      Navigator.of(context).push(
+          MaterialPageRoute(builder: (context) => Setting()));
+    else
+      errorLogin();
+  }
+
+  final scaffoldKey = new GlobalKey<ScaffoldState>();
+  final formKey = new GlobalKey<FormState>();
   final emailTextFiled=new TextEditingController();
   final passwrodTextFiled=new TextEditingController();
   Widget _buildEmailTF() {
@@ -36,7 +54,7 @@ class _LoginScreenState extends State<LoginScreen> {
           alignment: Alignment.centerLeft,
           decoration: kBoxDecorationStyleGezara,
           height: 60.0,
-          child: TextField(
+          child: TextFormField(
             controller: emailTextFiled,
             keyboardType: TextInputType.emailAddress,
             style: TextStyle(
@@ -72,7 +90,7 @@ class _LoginScreenState extends State<LoginScreen> {
           alignment: Alignment.centerLeft,
           decoration: kBoxDecorationStyleGezara,
           height: 60.0,
-          child: TextField(
+          child: TextFormField(
             controller: passwrodTextFiled,
             obscureText: true,
             style: TextStyle(
@@ -269,30 +287,11 @@ class _LoginScreenState extends State<LoginScreen> {
 //    Navigator.of(context).push(MaterialPageRoute(builder: (context) => MainPage()));
   }
   login(BuildContext context,String email,String password)async{
-//    SharedPreferences prefs=await SharedPreferences.getInstance();
-//    var uid=prefs.get("SessionID");
-//    pr.show();
-//    Map data= {
-//      "email": email.trim(),
-//      "password": password.trim()
-//    };
-//    var body=jsonEncode(data);
-//    var response= await http.post("https://rightclick.sa/projects/saud/api/rest/login",
-//        headers: {'X-Oc-Merchant-Id': 'SRQ7pJJG1VBXpQY5RPpUIigh3BdCl4He',
-//          'X-Oc-Session':uid}
-//        ,body: body);
-//    var jsonData=jsonDecode(response.body);
-//    if(response.statusCode==200){
-//      // print(jsonData);
-//      var curid=jsonData['data']['customer_id'];
-//      print("cu_id $curid ");
-//      setUserID(curid);
-//    }else{
-//      pr.hide();
-//      print(jsonData);
-//
-//      showAlertDialog(context);
-//    }
+    if (email.contains('@')) {
+      performLogin();
+    }else{
+      errorLogin();
+    }
   }
   showAlertDialog(BuildContext context) {
 
@@ -325,6 +324,7 @@ class _LoginScreenState extends State<LoginScreen> {
  //   pr = new ProgressDialog(context);
     return new Scaffold(
         body: new Stack(
+          key: scaffoldKey,
           children: <Widget>[
             ListView(
               children: <Widget>[
@@ -390,5 +390,8 @@ class _LoginScreenState extends State<LoginScreen> {
           ],
         )
     );
+  }
+  void errorLogin(){
+    showAlertDialog(context);
   }
 }
