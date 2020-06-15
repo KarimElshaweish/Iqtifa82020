@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:lqtifa/pages/about_page.dart';
+import 'package:lqtifa/pages/change_password_page.dart';
 import 'package:lqtifa/pages/detials_page.dart';
 import 'package:lqtifa/pages/edit_profile_information_page.dart';
 import 'package:lqtifa/pages/home_page.dart';

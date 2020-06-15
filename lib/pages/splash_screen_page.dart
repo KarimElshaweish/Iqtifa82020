@@ -3,9 +3,8 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:lqtifa/pages/login_page.dart';
-
-import '../main.dart';
-import 'home_screen_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'home_page.dart';
 
 class SplashScreen extends StatefulWidget{
   @override
@@ -20,7 +19,20 @@ class _SplashScreen extends State<SplashScreen>{
 
   }
   onDoneLoading() async {
-    Navigator.of(context).push(MaterialPageRoute(builder: (context) => LoginScreen()));
+    FirebaseUser user=await FirebaseAuth.instance.currentUser();
+    if(user==null) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => LoginScreen()),
+            (Route<dynamic> route) => false,
+      );
+    }else{
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => MainHome()),
+            (Route<dynamic> route) => false,
+      );
+    }
   }
   @override
   Widget build(BuildContext context) {

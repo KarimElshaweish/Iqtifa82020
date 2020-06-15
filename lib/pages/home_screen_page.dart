@@ -6,6 +6,7 @@ import 'package:lqtifa/Services/Auth.dart';
 import 'package:lqtifa/pages/about_page.dart';
 import 'package:lqtifa/pages/edit_profile_information_page.dart';
 import 'package:lqtifa/pages/home_page.dart';
+import 'package:lqtifa/pages/locaion_live.dart';
 import 'package:lqtifa/pages/login_page.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -218,19 +219,29 @@ class _Setting extends State<Setting>{
                           _CustomeButton(context,"| Home",'assets/home.png'),
                           Divider(),
                           _CustomeButton(context,"| Edit Profile Information",'assets/avatar.png'),
-                          Divider(),
-                          _CustomeButton(context,"| About",'assets/info.png'),
-                          Divider(),
-                          _CustomeButton(context,"| Help",'assets/help.png'),
+//                          Divider(),
+//                          _CustomeButton(context,"| About",'assets/info.png'),
+//                          Divider(),
+//                          _CustomeButton(context,"| Help",'assets/help.png'),
                           Divider(),
                           _CustomeButton(context,"| Terms and Conditions",'assets/terms.png'),
                           Divider(),
+//                          _CustomeButton(context,"| Developed by Right Click",'assets/right_click.png'),
+//                          Divider(),
                         ],
                       ),
                     )
                   ],
                 ),
-                _CustomeLogout(context)
+                _CustomeLogout(context),
+                GestureDetector(
+                  onTap: _launchURL,
+                  child: Image(
+                    height: 100,
+                    width: 100,
+                    image: AssetImage('assets/right_click.png'),
+                  ),
+                )
               ],
             )
           ],
@@ -238,5 +249,12 @@ class _Setting extends State<Setting>{
 
     );
   }
-
+  _launchURL() async {
+    const url = 'https://rightclick.sa/';
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
 }

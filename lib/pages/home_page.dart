@@ -7,9 +7,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
+import 'package:location/location.dart';
 import 'package:lqtifa/Utilites/Constants.dart';
 import 'package:lqtifa/pages/home_screen_page.dart';
-import 'package:lqtifa/pages/locaion_live.dart';
+
+import 'locaion_live.dart';
 
 class MainHome extends StatefulWidget{
   @override
@@ -19,6 +21,16 @@ class _MainHome extends State<MainHome>{
   @override
   void initState() {
     super.initState();
+   getPermission();
+  }
+  getPermission()async{
+    Location location=Location();
+    location.requestPermission().then((granted) {
+      if(granted != null){
+        location.onLocationChanged().listen((locationData) {
+        });
+      }
+    });
   }
   bool checkData(String date){
     DateTime now = new DateTime.now();
@@ -67,6 +79,9 @@ class _MainHome extends State<MainHome>{
   }catch(e){
     print(e);
   }
+  setState(() {
+    this.days=days;
+  });
     return days;
   }
 
@@ -169,17 +184,18 @@ class _MainHome extends State<MainHome>{
                           child: FutureBuilder(
                             future: getdata(),
                             builder: (BuildContext context,AsyncSnapshot snapshot){
+                              if(snapshot.hasData)
                               return
                                 GridView.count(crossAxisCount: 3,
-                            children: new List<Widget>.generate(days.length, (index) {
+                            children: new List<Widget>.generate(snapshot.data.length, (index) {
                               return new GridTile(
                                 child:
                                 GestureDetector(
                                   onTap:() {
-                                    Utils.currentDay=days[index].toString().split(" ")[1].replaceAll("/","");
+                                    Utils.currentDay=snapshot.data[index].toString().split(" ")[1].replaceAll("/","");
                                     print('utils:${Utils.currentDay}');
-                                    Utils.dayName=days[index].toString().split(" ")[0];
-                                    Utils.dayDate=days[index].toString().split(" ")[1];
+                                    Utils.dayName=snapshot.data[index].toString().split(" ")[0];
+                                    Utils.dayDate=snapshot.data[index].toString().split(" ")[1];
                                     Navigator.of(context).push(
                                         MaterialPageRoute(builder: (context) =>
                                             LiveLocation()));
@@ -208,7 +224,7 @@ class _MainHome extends State<MainHome>{
                                             ),
                                             Center(
                                               child:  Text(
-                                                '${days[index]}  Places Visted',
+                                                '${snapshot.data[index]}  Places Visted',
                                                 textAlign: TextAlign.center,
                                                 style: TextStyle(
                                                   color: Color(0xff707070),
@@ -226,6 +242,8 @@ class _MainHome extends State<MainHome>{
                                 )
                               );
                             }));
+                              else
+                                CircularProgressIndicator();
                             },
                           )
                       )

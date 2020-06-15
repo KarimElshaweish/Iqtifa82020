@@ -1,11 +1,14 @@
 
 import 'dart:convert';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:lqtifa/Services/Auth.dart';
 import 'package:lqtifa/Utilites/Constants.dart';
+import 'package:lqtifa/pages/sign_up_page.dart';
 
 import 'home_screen_page.dart';
 
@@ -16,21 +19,24 @@ class LoginScreen extends StatefulWidget{
 }
 class _LoginScreenState extends State<LoginScreen> {
   bool _rememberMe = false;
+
+  get email => null;
   onSignUpClicked() async {
 
   //  Navigator.of(context).push(MaterialPageRoute(builder: (context) => SignUpScreen()));
   }
   onLoginClicked() async {
 
-    Navigator.of(context).push(MaterialPageRoute(builder: (context) => LoginScreen()));
+    Navigator.of(context).push(MaterialPageRoute(builder: (context) => SignUpScreen()));
   }
   void performLogin()async {
     Auth auth = new Auth();
     var value = await auth.signIn(emailTextFiled.text.trim().toString(),
         passwrodTextFiled.text.trim().toString());
-    if (value != null)
-      Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => Setting()));
+    if (value != null){
+      Route route = MaterialPageRoute(builder: (context) => Setting());
+      Navigator.pushReplacement(context, route);
+    }
     else
       errorLogin();
   }
@@ -110,12 +116,41 @@ class _LoginScreenState extends State<LoginScreen> {
       ],
     );
   }
-
+  changePasswordRequest()async{
+    try {
+      String emailForget = emailTextFiled.text.toString();
+      print('email:$emailForget');
+      if (emailForget.contains('@')) {
+        FirebaseAuth.instance.sendPasswordResetEmail(email: emailForget);
+        Fluttertoast.showToast(
+            msg: "password sent to your email",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.black54,
+            textColor: Colors.white,
+            fontSize: 16.0
+        );
+      } else {
+        Fluttertoast.showToast(
+            msg: "please enter your email correclty",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.black54,
+            textColor: Colors.white,
+            fontSize: 16.0
+        );
+      }
+    }catch(e){
+      print(e);
+    }
+  }
   Widget _buildForgotPasswordBtn() {
     return Container(
       alignment: Alignment.centerRight,
       child: FlatButton(
-        onPressed: () => print('Forgot Password Button Pressed'),
+        onPressed: () => changePasswordRequest(),
         padding: EdgeInsets.only(right: 0.0),
         child: Text(
           'Forgot Password?',

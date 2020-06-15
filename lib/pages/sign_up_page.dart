@@ -28,8 +28,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
     //Navigator.of(context).push(MaterialPageRoute(builder: (context) => MainPage()));
   }
   onLoginClicked() async {
-
-    Navigator.of(context).push(MaterialPageRoute(builder: (context) => LoginScreen()));
+    Route route = MaterialPageRoute(builder: (context) => LoginScreen());
+    Navigator.pushReplacement(context, route);
+   // Navigator.of(context).push(MaterialPageRoute(builder: (context) => LoginScreen()));
   }
   register()async {
     if (emailTextFiled.text.contains('@') && phoneNumberFiled.text
