@@ -57,6 +57,8 @@ class _DetialsPage extends State<DetialsPage> {
       //  String date='${now.day}${now.month}${now.year}';
       // ignore: unrelated_type_equality_checks
       print("Aaaaaaaaaaaaaaaaaaaaaa:$Utils.currentDay");
+      FirebaseUser user1=await FirebaseAuth.instance.currentUser();
+      uid=user1.uid;
       if(Utils.currentDay=="${now.day}${now.month}${now.year}") {
         DBRef.child(
             "data/${uid}/${Utils.currentDay}/${long.toString().replaceAll(
@@ -356,7 +358,8 @@ class _DetialsPage extends State<DetialsPage> {
     print("getdata func");
     if(places.length==0) {
       places.clear();
-      DBRef.child("data/${uid}/${Utils.currentDay}").orderByChild('time').once().then((DataSnapshot snapshot) {
+      DBRef.child("data/${uid}/${Utils.currentDay}")
+          .orderByChild('time').once().then((DataSnapshot snapshot) {
         inside=true;
         try {
           Map<dynamic, dynamic> values = snapshot.value;
