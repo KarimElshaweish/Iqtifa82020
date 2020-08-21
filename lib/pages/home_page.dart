@@ -180,7 +180,7 @@ class _MainHome extends State<MainHome>{
                         ),
                       ),
                       SizedBox(
-                          height: 500,
+                          height: 800,
                           child: FutureBuilder(
                             future: getdata(),
                             builder: (BuildContext context,AsyncSnapshot snapshot){
